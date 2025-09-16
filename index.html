@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>exxteam - Coprisional</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: black;
+      color: white;
+      text-align: center;
+      overflow-x: hidden;
+    }
+
+    header {
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    header img {
+      height: 40px;
+      margin-right: 10px;
+    }
+
+    .title {
+      font-size: 22px;
+      margin: 20px 15px;
+    }
+
+    .highlight {
+      color: #ff0055;
+    }
+
+    .button-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      margin: 20px 0 50px;
+    }
+
+    .button {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #111;
+      border-radius: 15px;
+      width: 85%;
+      max-width: 350px;
+      padding: 15px 0;
+      text-decoration: none;
+      color: white;
+      font-size: 18px;
+      gap: 10px;
+      transition: transform 0.2s, background 0.3s;
+      cursor: pointer;
+    }
+
+    .button img {
+      width: 55px;
+      height: 55px;
+      object-fit: contain;
+    }
+
+    .button:hover {
+      background: #333;
+      transform: scale(1.03);
+    }
+
+    /* Popup Center */
+    .popup-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      z-index: 999;
+    }
+    .popup-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .popup {
+      background: #111;
+      width: 80%;
+      max-width: 300px;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(255,255,255,0.2);
+      transform: scale(0.8);
+      transition: transform 0.3s ease;
+      position: relative;
+    }
+    .popup.open {
+      transform: scale(1);
+    }
+
+    .popup h2 {
+      margin-bottom: 15px;
+    }
+
+    .popup-buttons {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 15px;
+    }
+
+    .popup-buttons button {
+      padding: 8px 15px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .yes-btn {
+      background: #ff0055;
+      color: white;
+    }
+
+    .no-btn {
+      background: #333;
+      color: white;
+    }
+
+    /* Tombol X Popup */
+    .close-x {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 20px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      color: white;
+    }
+
+    /* Side Menu */
+    .menu-icon {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      cursor: pointer;
+      z-index: 1001;
+      transition: opacity 0.3s ease;
+    }
+    .menu-icon.disabled {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+    .menu-icon div {
+      width: 30px;
+      height: 4px;
+      background-color: white;
+      margin: 6px 0;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+    .menu-icon.open div:nth-child(1) {
+      transform: translateY(10px) rotate(45deg);
+    }
+    .menu-icon.open div:nth-child(2) {
+      opacity: 0;
+    }
+    .menu-icon.open div:nth-child(3) {
+      transform: translateY(-10px) rotate(-45deg);
+    }
+
+    .side-menu {
+      position: fixed;
+      top: 0; left: 0;
+      width: 70%;
+      height: 100%;
+      background: #222;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      padding-top: 60px;
+      z-index: 1000;
+    }
+    .side-menu.open {
+      transform: translateX(0);
+    }
+    .side-menu a {
+      display: block;
+      padding: 20px;
+      color: white;
+      text-decoration: none;
+      font-size: 18px;
+      border-bottom: 1px solid #444;
+      transition: background 0.3s ease;
+    }
+    .side-menu a:hover {
+      background: #333;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <img src="https://i.imgur.com/raydr8h.png" alt="Logo">
+  <h1>S.Y.N</h1>
+  <div class="menu-icon" onclick="toggleSideMenu()" id="menuIcon">
+    <div></div>
+    <div></div>
+    <div></div>
+  </div>
+</header>
+
+<div class="title">
+  Pilih Menu di bawah apa yang kamu mau <span class="highlight">Pelajari!</span>
+</div>
+
+<div class="desc">
+  4 Menu
+</div>
+
+<div class="button-container">
+  <div class="button" onclick="showPopup('https://youtu.be/3U1AhjEf7DM?si=iNYWEZrA6SkLhwmj')">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/6/61/HTML5_logo_and_wordmark.svg" alt="HTML">
+    <span>Belajar HTML</span>
+  </div>
+  <div class="button" onclick="showPopup('https://youtu.be/kpa2ab1sYio?si=Aw5tbgL4bkbeGpKp')">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/d/d5/CSS3_logo_and_wordmark.svg" alt="CSS">
+    <span>Belajar CSS</span>
+  </div>
+  <div class="button" onclick="showPopup('https://w3schools.com')">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6a/JavaScript-logo.png" alt="JS">
+    <span>Belajar JS</span>
+  </div>
+  <!-- Tombol Baru -->
+  <div class="button" onclick="showPopup('https://pastebin.com/raw/rJ4c3BDJ')">
+    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTggp4S4Pw8ivueF_JEfsg2jik2vN5vqTvCHiKDXJNnKg&s=10" alt="Script Web">
+    <span>Script WEB</span>
+  </div>
+</div>
+
+<!-- Popup Center -->
+<div class="popup-overlay" id="popupOverlay">
+  <div class="popup" id="popup">
+    <button class="close-x" onclick="closePopup()">✖</button>
+    <h2>Apakah anda yakin ingin melihat?</h2>
+    <div class="popup-buttons">
+      <button class="yes-btn" onclick="goToLink()">Iya</button>
+      <button class="no-btn" onclick="closePopup()">Tidak</button>
+    </div>
+  </div>
+</div>
+
+<!-- Side Menu -->
+<div class="side-menu" id="sideMenu">
+  <a href="https://realexxteam.github.io/REAcreditAplikasi/" target="_blank">Credits</a>
+  <a href="https://realexxteam.github.io/TicketSupportREA/" target="_blank">Ticket Support</a>
+  <a href="https://realexxteam.github.io/ssstiktok/" target="_blank">Sss Tiktok</a>
+</div>
+
+<script>
+let currentLink = "";
+
+function showPopup(link) {
+  currentLink = link;
+  document.getElementById("popupOverlay").classList.add("open");
+  document.getElementById("popup").classList.add("open");
+  document.getElementById("menuIcon").classList.add("disabled");
+}
+
+function closePopup() {
+  document.getElementById("popupOverlay").classList.remove("open");
+  document.getElementById("popup").classList.remove("open");
+  document.getElementById("menuIcon").classList.remove("disabled");
+}
+
+function goToLink() {
+  window.open(currentLink, "_blank");
+  closePopup();
+}
+
+function toggleSideMenu() {
+  const sideMenu = document.getElementById('sideMenu');
+  const menuIcon = document.querySelector('.menu-icon');
+  sideMenu.classList.toggle('open');
+  menuIcon.classList.toggle('open');
+  document.body.style.overflow = sideMenu.classList.contains('open') ? 'hidden' : 'auto';
+}
+</script>
+
+</body>
+</html>
