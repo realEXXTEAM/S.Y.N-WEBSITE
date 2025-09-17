@@ -1,17 +1,32 @@
-<!DOCTYPE html>
+<!Home Page>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>exxteam - Coprisional</title>
   <style>
-    body {
+    html, body {
       margin: 0;
+      padding: 0;
       font-family: Arial, sans-serif;
-      background: black;
       color: white;
       text-align: center;
       overflow-x: hidden;
+      height: 100%;
+      background: black;
+    }
+
+    /* Canvas background (matrix) */
+    canvas#matrixBackground {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: black;
+      pointer-events: none; /* penting supaya canvas gak nangkep klik */
+      aria-hidden: true;
     }
 
     header {
@@ -49,7 +64,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: #111;
+      background: rgba(17,17,17,0.8);
       border-radius: 15px;
       width: 85%;
       max-width: 350px;
@@ -58,8 +73,9 @@
       color: white;
       font-size: 18px;
       gap: 10px;
-      transition: transform 0.2s, background 0.3s;
+      transition: transform 0.2s, background 0.3s, box-shadow 0.3s;
       cursor: pointer;
+      backdrop-filter: blur(2px);
     }
 
     .button img {
@@ -69,8 +85,9 @@
     }
 
     .button:hover {
-      background: #333;
+      background: rgba(51,51,51,0.9);
       transform: scale(1.03);
+      box-shadow: 0 0 15px #00ff88;
     }
 
     /* Popup Center */
@@ -105,39 +122,14 @@
       transition: transform 0.3s ease;
       position: relative;
     }
-    .popup.open {
-      transform: scale(1);
-    }
+    .popup.open { transform: scale(1); }
+    .popup h2 { margin-bottom: 15px; }
 
-    .popup h2 {
-      margin-bottom: 15px;
-    }
+    .popup-buttons { display:flex; justify-content:space-around; margin-top:15px; }
+    .popup-buttons button { padding:8px 15px; border:none; border-radius:8px; cursor:pointer; font-size:16px; }
+    .yes-btn { background:#ff0055; color:white; }
+    .no-btn { background:#333; color:white; }
 
-    .popup-buttons {
-      display: flex;
-      justify-content: space-around;
-      margin-top: 15px;
-    }
-
-    .popup-buttons button {
-      padding: 8px 15px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 16px;
-    }
-
-    .yes-btn {
-      background: #ff0055;
-      color: white;
-    }
-
-    .no-btn {
-      background: #333;
-      color: white;
-    }
-
-    /* Tombol X Popup */
     .close-x {
       position: absolute;
       top: 10px;
@@ -158,26 +150,11 @@
       z-index: 1001;
       transition: opacity 0.3s ease;
     }
-    .menu-icon.disabled {
-      opacity: 0.4;
-      pointer-events: none;
-    }
-    .menu-icon div {
-      width: 30px;
-      height: 4px;
-      background-color: white;
-      margin: 6px 0;
-      transition: transform 0.3s ease, opacity 0.3s ease;
-    }
-    .menu-icon.open div:nth-child(1) {
-      transform: translateY(10px) rotate(45deg);
-    }
-    .menu-icon.open div:nth-child(2) {
-      opacity: 0;
-    }
-    .menu-icon.open div:nth-child(3) {
-      transform: translateY(-10px) rotate(-45deg);
-    }
+    .menu-icon.disabled { opacity: 0.4; pointer-events: none; } /* disable saat popup on */
+    .menu-icon div { width: 30px; height: 4px; background-color: white; margin: 6px 0; transition: transform 0.3s ease, opacity 0.3s ease; }
+    .menu-icon.open div:nth-child(1) { transform: translateY(10px) rotate(45deg); }
+    .menu-icon.open div:nth-child(2) { opacity: 0; }
+    .menu-icon.open div:nth-child(3) { transform: translateY(-10px) rotate(-45deg); }
 
     .side-menu {
       position: fixed;
@@ -190,111 +167,229 @@
       padding-top: 60px;
       z-index: 1000;
     }
-    .side-menu.open {
-      transform: translateX(0);
-    }
-    .side-menu a {
-      display: block;
-      padding: 20px;
-      color: white;
-      text-decoration: none;
-      font-size: 18px;
-      border-bottom: 1px solid #444;
-      transition: background 0.3s ease;
-    }
-    .side-menu a:hover {
-      background: #333;
+    .side-menu.open { transform: translateX(0); }
+    .side-menu a { display:block; padding:20px; color:white; text-decoration:none; font-size:18px; border-bottom:1px solid #444; transition: background 0.3s; }
+    .side-menu a:hover { background:#333; }
+
+    /* Desktop tweaks */
+    @media (min-width: 768px) {
+      header img { height: 60px; }
+      .title { font-size: 28px; }
+      .button-container { flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 20px; }
+      .button { width: 200px; font-size: 20px; padding: 20px 0; }
     }
   </style>
 </head>
 <body>
 
-<header>
-  <img src="https://i.imgur.com/raydr8h.png" alt="Logo">
-  <h1>S.Y.N</h1>
-  <div class="menu-icon" onclick="toggleSideMenu()" id="menuIcon">
-    <div></div>
-    <div></div>
-    <div></div>
-  </div>
-</header>
+  <!-- Canvas Background -->
+  <canvas id="matrixBackground"></canvas>
 
-<div class="title">
-  Pilih Menu di bawah apa yang kamu mau <span class="highlight">Pelajari!</span>
-</div>
+  <header>
+    <img src="https://i.imgur.com/raydr8h.png" alt="Logo">
+    <h1>S.Y.N</h1>
+    <div class="menu-icon" onclick="toggleSideMenu()" id="menuIcon" role="button" aria-label="Open menu">
+      <div></div><div></div><div></div>
+    </div>
+  </header>
 
-<div class="desc">
-  4 Menu
-</div>
+  <div class="title">
+    Pilih Menu di bawah apa yang kamu mau <span class="highlight">Pelajari!</span>
+  </div>
 
-<div class="button-container">
-  <div class="button" onclick="showPopup('https://youtu.be/3U1AhjEf7DM?si=iNYWEZrA6SkLhwmj')">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/6/61/HTML5_logo_and_wordmark.svg" alt="HTML">
-    <span>Belajar HTML</span>
-  </div>
-  <div class="button" onclick="showPopup('https://youtu.be/kpa2ab1sYio?si=Aw5tbgL4bkbeGpKp')">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/d/d5/CSS3_logo_and_wordmark.svg" alt="CSS">
-    <span>Belajar CSS</span>
-  </div>
-  <div class="button" onclick="showPopup('https://w3schools.com')">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6a/JavaScript-logo.png" alt="JS">
-    <span>Belajar JS</span>
-  </div>
-  <!-- Tombol Baru -->
-  <div class="button" onclick="showPopup('https://pastebin.com/raw/rJ4c3BDJ')">
-    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTggp4S4Pw8ivueF_JEfsg2jik2vN5vqTvCHiKDXJNnKg&s=10" alt="Script Web">
-    <span>Script WEB</span>
-  </div>
-</div>
+  <div class="desc">4 Menu</div>
 
-<!-- Popup Center -->
-<div class="popup-overlay" id="popupOverlay">
-  <div class="popup" id="popup">
-    <button class="close-x" onclick="closePopup()">✖</button>
-    <h2>Apakah anda yakin ingin melihat?</h2>
-    <div class="popup-buttons">
-      <button class="yes-btn" onclick="goToLink()">Iya</button>
-      <button class="no-btn" onclick="closePopup()">Tidak</button>
+  <div class="button-container">
+    <div class="button" onclick="showPopup('https://youtu.be/3U1AhjEf7DM?si=iNYWEZrA6SkLhwmj')">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/6/61/HTML5_logo_and_wordmark.svg" alt="HTML">
+      <span>Belajar HTML</span>
+    </div>
+    <div class="button" onclick="showPopup('https://youtu.be/kpa2ab1sYio?si=Aw5tbgL4bkbeGpKp')">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/d/d5/CSS3_logo_and_wordmark.svg" alt="CSS">
+      <span>Belajar CSS</span>
+    </div>
+    <div class="button" onclick="showPopup('https://w3schools.com')">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/6/6a/JavaScript-logo.png" alt="JS">
+      <span>Belajar JS</span>
+    </div>
+    <!-- Script WEB (pakai inline SVG supaya gak ngebug) -->
+    <div class="button" onclick="showPopup('https://pastebin.com/raw/rJ4c3BDJ')">
+      <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0%200%2024%2024'><path fill='%23ffffff' d='M8.7%2016.3L3.4%2012%208.7%207.7%2010.1%209.1%206.6%2012l3.5%202.9-1.4%201.4zM15.3%207.7L20.6%2012l-5.3%204.3-1.4-1.4L17.4%2012l-3.5-2.9%201.4-1.4z'/></svg>" alt="Script Web">
+      <span>Script WEB</span>
     </div>
   </div>
-</div>
 
-<!-- Side Menu -->
-<div class="side-menu" id="sideMenu">
-  <a href="https://realexxteam.github.io/REAcreditAplikasi/" target="_blank">Credits</a>
-  <a href="https://realexxteam.github.io/TicketSupportREA/" target="_blank">Ticket Support</a>
-  <a href="https://realexxteam.github.io/ssstiktok/" target="_blank">Sss Tiktok</a>
-</div>
+  <!-- Popup Center -->
+  <div class="popup-overlay" id="popupOverlay">
+    <div class="popup" id="popup">
+      <button class="close-x" onclick="closePopup()">✖</button>
+      <h2>Apakah anda yakin ingin melihat?</h2>
+      <div class="popup-buttons">
+        <button class="yes-btn" onclick="goToLink()">Iya</button>
+        <button class="no-btn" onclick="closePopup()">Tidak</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Side Menu -->
+  <div class="side-menu" id="sideMenu">
+    <a href="https://realexxteam.github.io/REAcreditAplikasi/" target="_blank">Credits</a>
+    <a href="https://realexxteam.github.io/TicketSupportREA/" target="_blank">Ticket Support</a>
+    <a href="https://realexxteam.github.io/ssstiktok/" target="_blank">Sss Tiktok</a>
+  </div>
 
 <script>
-let currentLink = "";
-
-function showPopup(link) {
-  currentLink = link;
-  document.getElementById("popupOverlay").classList.add("open");
-  document.getElementById("popup").classList.add("open");
-  document.getElementById("menuIcon").classList.add("disabled");
-}
-
-function closePopup() {
-  document.getElementById("popupOverlay").classList.remove("open");
-  document.getElementById("popup").classList.remove("open");
-  document.getElementById("menuIcon").classList.remove("disabled");
-}
-
-function goToLink() {
-  window.open(currentLink, "_blank");
-  closePopup();
-}
-
-function toggleSideMenu() {
+/* wrap everything after DOM ready untuk menghindari error kalau elemen belum ada */
+document.addEventListener('DOMContentLoaded', () => {
+  // elements
+  const popupOverlay = document.getElementById('popupOverlay');
+  const popup = document.getElementById('popup');
+  const menuIconEl = document.getElementById('menuIcon');
   const sideMenu = document.getElementById('sideMenu');
-  const menuIcon = document.querySelector('.menu-icon');
-  sideMenu.classList.toggle('open');
-  menuIcon.classList.toggle('open');
-  document.body.style.overflow = sideMenu.classList.contains('open') ? 'hidden' : 'auto';
-}
+
+  let currentLink = "";
+
+  // expose functions to global so inline onclick still works
+  window.showPopup = function(link) {
+    currentLink = link || "";
+    if (popupOverlay && popup && menuIconEl) {
+      popupOverlay.classList.add('open');
+      popup.classList.add('open');
+      menuIconEl.classList.add('disabled');
+      menuIconEl.setAttribute('aria-disabled', 'true');
+    } else {
+      // fallback kalau elemen ilang: langsung buka link
+      if (link) window.open(link, '_blank');
+    }
+  };
+
+  window.closePopup = function() {
+    if (popupOverlay && popup && menuIconEl) {
+      popupOverlay.classList.remove('open');
+      popup.classList.remove('open');
+      menuIconEl.classList.remove('disabled');
+      menuIconEl.removeAttribute('aria-disabled');
+    }
+  };
+
+  window.goToLink = function() {
+    if (currentLink) window.open(currentLink, '_blank');
+    closePopup();
+  };
+
+  window.toggleSideMenu = function() {
+    if (!sideMenu || !menuIconEl) return;
+    sideMenu.classList.toggle('open');
+    menuIconEl.classList.toggle('open');
+    document.body.style.overflow = sideMenu.classList.contains('open') ? 'hidden' : 'auto';
+  };
+
+  // klik overlay diluar popup -> close
+  if (popupOverlay) {
+    popupOverlay.addEventListener('click', (e) => {
+      if (e.target === popupOverlay) closePopup();
+    });
+  }
+
+  /* ===== MATRIX BACKGROUND ANIMATION ===== */
+  const canvas = document.getElementById('matrixBackground');
+  const ctx = canvas && canvas.getContext ? canvas.getContext('2d') : null;
+  if (!canvas || !ctx) return;
+
+  let fontSize = 16;
+  let width = window.innerWidth;
+  let height = window.innerHeight;
+  canvas.width = width;
+  canvas.height = height;
+  const letters = "アァイィウヴエェオカキクケコサシスセソタチツテトナニヌネノ0123456789";
+
+  let columns = Math.max(1, Math.floor(width / fontSize));
+  let drops = new Array(columns).fill(1);
+
+  // recompute when resize
+  function resizeCanvas() {
+    width = window.innerWidth;
+    height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
+    columns = Math.max(1, Math.floor(width / fontSize));
+    drops = new Array(columns).fill(1);
+    ctx.font = fontSize + 'px monospace';
+  }
+  window.addEventListener('resize', resizeCanvas);
+
+  // control fps for requestAnimationFrame
+  let lastTime = 0;
+  const fps = 30;
+  const interval = 1000 / fps;
+
+  function draw(time) {
+    requestAnimationFrame(draw);
+    if (!lastTime) lastTime = time;
+    const delta = time - lastTime;
+    if (delta < interval) return;
+    lastTime = time;
+
+    ctx.fillStyle = 'rgba(0,0,0,0.08)';
+    ctx.fillRect(0, 0, width, height);
+    ctx.fillStyle = '#00ff88';
+    ctx.font = fontSize + 'px monospace';
+
+    for (let i = 0; i < drops.length; i++) {
+      const text = letters.charAt(Math.floor(Math.random() * letters.length));
+      ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+      if (drops[i] * fontSize > height && Math.random() > 0.975) {
+        drops[i] = 0;
+      }
+      drops[i]++;
+    }
+  }
+
+  requestAnimationFrame(draw);
+});
 </script>
+
+
+<script>
+(function(){
+  // Cek dulu apakah sudah ada video biar ga double
+  if (document.querySelector('.bg-video')) return;
+
+  // Buat elemen video
+  const video = document.createElement('video');
+  video.classList.add('bg-video');
+  video.autoplay = true;
+  video.muted = true;
+  video.loop = true;
+  video.playsInline = true;
+
+  // Ganti link di bawah sesuai video yang lu mau
+  video.src = "https://assets.mixkit.co/videos/preview/mixkit-digital-code-background-1976-large.mp4";
+
+  // Pasang CSS langsung dari JS
+  const style = document.createElement('style');
+  style.innerHTML = `
+    .bg-video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -1;
+      filter: brightness(0.4);
+      background: black;
+    }
+  `;
+  document.head.appendChild(style);
+
+  // Tambahin ke body paling atas
+  document.body.prepend(video);
+})();
+</script>
+
 
 </body>
 </html>
+
+
